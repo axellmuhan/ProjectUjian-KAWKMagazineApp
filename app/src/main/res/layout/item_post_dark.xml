@@ -97,6 +97,7 @@
         android:layout_marginBottom="16dp">
 
         <TextView
+            android:id="@+id/like_action"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="20,8k"
@@ -106,6 +107,7 @@
             app:drawableTint="@color/dark_text_secondary"/>
 
         <TextView
+            android:id="@+id/comment_action"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="172"
@@ -116,6 +118,7 @@
             app:drawableTint="@color/dark_text_secondary"/>
 
         <TextView
+            android:id="@+id/share_action"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="3,4k"

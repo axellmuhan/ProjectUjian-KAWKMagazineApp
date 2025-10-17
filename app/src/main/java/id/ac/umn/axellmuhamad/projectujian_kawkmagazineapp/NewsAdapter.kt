@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 
 // Adapter sekarang menerima sebuah daftar (List) dari NewsPost
@@ -16,6 +17,9 @@ class NewsAdapter(private val newsList: List<NewsPost>) : RecyclerView.Adapter<N
         val authorNameTextView: TextView = view.findViewById(R.id.author_name)
         val postTextView: TextView = view.findViewById(R.id.post_text)
         val postImageView: ImageView = view.findViewById(R.id.post_image)
+        // **TAMBAHAN BARU: Referensi ke ikon komentar**
+        // Pastikan Anda memberi ID ini pada TextView komentar di item_post_dark.xml
+        val commentActionView: TextView = view.findViewById(R.id.comment_action)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsViewHolder {
@@ -33,15 +37,27 @@ class NewsAdapter(private val newsList: List<NewsPost>) : RecyclerView.Adapter<N
         holder.postTextView.text = currentPost.postText
         holder.postImageView.setImageResource(currentPost.imageResId)
 
-        // **BAGIAN TERPENTING: Menambahkan OnClickListener**
+        // OnClickListener untuk membuka gambar layar penuh
         holder.postImageView.setOnClickListener {
             val context = holder.itemView.context
-            // Buat Intent untuk membuka ImageViewerActivity
             val intent = Intent(context, ImageViewerActivity::class.java).apply {
-                // Kirim ID gambar yang diklik ke activity baru
                 putExtra("IMAGE_RES_ID", currentPost.imageResId)
             }
             context.startActivity(intent)
+        }
+
+        // **TAMBAHAN BARU: OnClickListener untuk membuka layar komentar**
+        holder.commentActionView.setOnClickListener {
+            val context = holder.itemView.context
+            // Dapatkan FragmentManager dari Activity yang menampung RecyclerView ini
+            val fragmentManager = (context as? AppCompatActivity)?.supportFragmentManager
+
+            if (fragmentManager != null) {
+                // Buat instance dari CommentBottomSheetFragment
+                val commentSheet = CommentBottomSheetFragment()
+                // Tampilkan Bottom Sheet
+                commentSheet.show(fragmentManager, "CommentBottomSheetFragment")
+            }
         }
     }
 
