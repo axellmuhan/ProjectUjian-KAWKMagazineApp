@@ -5,9 +5,13 @@
         android:title="Home"
         android:icon="@drawable/ic_home" />
     <item
-        android:id="@+id/exploreFragment"
-        android:title="Explore"
-        android:icon="@drawable/ic_explore" />
+        android:id="@+id/searchFragment"
+        android:title="Search"
+        android:icon="@drawable/ic_search" />
+    <item
+        android:id="@+id/comingSoonFragment"
+        android:title="Coming Soon"
+        android:icon="@drawable/ic_coming_soon" />
     <item
         android:id="@+id/profileFragment"
         android:title="Profile"
