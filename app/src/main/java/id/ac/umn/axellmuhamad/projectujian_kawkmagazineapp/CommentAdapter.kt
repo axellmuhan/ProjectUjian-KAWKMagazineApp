@@ -1,4 +1,4 @@
-package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp // Sesuaikan dengan package Anda
+package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp
 
 import android.view.LayoutInflater
 import android.view.View

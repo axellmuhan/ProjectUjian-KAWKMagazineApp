@@ -1,4 +1,4 @@
-package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp // Sesuaikan
+package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -19,7 +19,6 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Buat data berita contoh (dummy data)
         val dummyPosts = listOf(
             NewsPost("KAWK News", "Apple Merilis Vision Pro Generasi Terbaru", R.drawable.news_placeholder_1),
             NewsPost("Tekno Mania", "Google I/O 2025: Apa Saja yang Baru dari Android?", R.drawable.news_placeholder_1),
@@ -29,7 +28,6 @@ class HomeFragment : Fragment() {
         )
 
         val newsRecyclerView: RecyclerView = view.findViewById(R.id.news_recyclerview)
-        // Berikan daftar berita ke adapter
         newsRecyclerView.adapter = NewsAdapter(dummyPosts)
     }
 }
