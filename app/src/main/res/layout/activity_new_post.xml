@@ -36,6 +36,7 @@
     </RelativeLayout>
 
     <LinearLayout
+        android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -64,15 +65,26 @@
         </LinearLayout>
 
         <EditText
-            android:id="@+id/post_edit_text" android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:id="@+id/post_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="What's on your mind?"
+            android:minLines="3"
             android:textColorHint="@color/dark_text_secondary"
             android:textColor="@color/dark_text_primary"
             android:background="@android:color/transparent"
             android:gravity="top"
             android:layout_marginTop="16dp"/>
+
+        <ImageView
+            android:id="@+id/image_preview"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginTop="16dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:contentDescription="Pratinjau Gambar"/>
 
     </LinearLayout>
 
@@ -85,6 +97,7 @@
         android:paddingVertical="8dp">
 
         <TextView
+            android:id="@+id/library_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -96,6 +109,7 @@
             app:drawableTint="@color/dark_text_secondary" />
 
         <TextView
+            android:id="@+id/camera_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -105,7 +119,6 @@
             android:drawablePadding="4dp"
             app:drawableTopCompat="@drawable/ic_camera"
             app:drawableTint="@color/dark_text_secondary" />
-
     </LinearLayout>
 
 </RelativeLayout>
