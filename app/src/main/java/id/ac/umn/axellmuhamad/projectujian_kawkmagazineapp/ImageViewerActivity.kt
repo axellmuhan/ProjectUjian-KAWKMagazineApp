@@ -1,4 +1,4 @@
-package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp // Sesuaikan
+package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -11,7 +11,6 @@ class ImageViewerActivity : AppCompatActivity() {
 
         val fullScreenImageView: ImageView = findViewById(R.id.fullScreenImageView)
 
-        // Cek apakah ada data gambar yang dikirim dari intent
         if (intent.hasExtra("IMAGE_RES_ID")) {
             val imageResId = intent.getIntExtra("IMAGE_RES_ID", 0)
             if (imageResId != 0) {
