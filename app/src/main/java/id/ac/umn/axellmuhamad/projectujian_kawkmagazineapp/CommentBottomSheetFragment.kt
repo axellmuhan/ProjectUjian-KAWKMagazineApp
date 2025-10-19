@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
@@ -43,14 +44,10 @@ class CommentBottomSheetFragment : BottomSheetDialogFragment() {
         val replyEditText: EditText = view.findViewById(R.id.reply_edittext)
         val cancelButton: TextView = view.findViewById(R.id.cancel_button)
 
-        // Setup RecyclerView
-        commentAdapter = CommentAdapter(commentList)
+        commentAdapter = CommentAdapter(commentList, articleId ?: "")
         commentsRecyclerView.layoutManager = LinearLayoutManager(context)
         commentsRecyclerView.adapter = commentAdapter
 
-        // Mulai ambil data komentar dari Firestore
-        // Jika tidak ada koneksi/data, data contoh akan ditampilkan
-        setupInitialComments()
         fetchComments()
 
         cancelButton.setOnClickListener {
@@ -76,8 +73,16 @@ class CommentBottomSheetFragment : BottomSheetDialogFragment() {
                     Log.e("CommentSheet", "Error fetching comments", error)
                     return@addSnapshotListener
                 }
-                if (snapshots != null && !snapshots.isEmpty) {
-                    val fetchedComments = snapshots.toObjects(Comment::class.java)
+
+                if (snapshots != null) {
+                    val fetchedComments = mutableListOf<Comment>()
+                    for (document in snapshots.documents) {
+                        val comment = document.toObject(Comment::class.java)
+                        if (comment != null) {
+                            comment.id = document.id
+                            fetchedComments.add(comment)
+                        }
+                    }
                     commentList.clear()
                     commentList.addAll(fetchedComments)
                     commentAdapter.notifyDataSetChanged()
@@ -86,16 +91,16 @@ class CommentBottomSheetFragment : BottomSheetDialogFragment() {
     }
 
     private fun postNewComment(commentText: String, replyEditText: EditText) {
-        // Kita ubah data class yang dikirim ke Firestore agar sesuai
-        val newCommentData = hashMapOf(
-            "authorName" to "You",
-            "commentText" to commentText,
-            "createdAt" to com.google.firebase.Timestamp.now()
+        val articleDocRef = db.collection("articles").document(articleId!!)
+        val newComment = Comment(
+            authorName = "You",
+            commentText = commentText
         )
-
-        db.collection("articles").document(articleId!!)
-            .collection("comments")
-            .add(newCommentData)
+        db.runBatch { batch ->
+            val newCommentRef = articleDocRef.collection("comments").document()
+            batch.set(newCommentRef, newComment)
+            batch.update(articleDocRef, "commentCount", FieldValue.increment(1))
+        }
             .addOnSuccessListener {
                 Toast.makeText(context, "Comment posted!", Toast.LENGTH_SHORT).show()
                 replyEditText.text.clear()
@@ -106,19 +111,9 @@ class CommentBottomSheetFragment : BottomSheetDialogFragment() {
             }
     }
 
-    // ## BAGIAN YANG DIPERBAIKI ##
-    private fun setupInitialComments() {
-        commentList.clear()
-        // Tambahkan parameter ketiga (R.drawable.ic_profile) untuk setiap item
-        commentList.addAll(listOf(
-            Comment("Karrell Wilson", "Sangat informatif!", R.drawable.ic_profile),
-            Comment("Ece", "Artikel yang bagus, terima kasih.", R.drawable.ic_profile),
-            Comment("John Doe", "Saya setuju dengan poin-poinnya.", R.drawable.ic_profile)
-        ))
-    }
-
     companion object {
         private const val ARG_ARTICLE_ID = "article_id"
+
         fun newInstance(articleId: String): CommentBottomSheetFragment {
             val fragment = CommentBottomSheetFragment()
             val args = Bundle()

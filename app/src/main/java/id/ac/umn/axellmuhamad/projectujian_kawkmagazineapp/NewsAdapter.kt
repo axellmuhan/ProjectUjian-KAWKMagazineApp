@@ -20,7 +20,6 @@ class NewsAdapter(private var articleList: List<Article>) : RecyclerView.Adapter
         val postImageView: ImageView = view.findViewById(R.id.post_image)
         val commentActionView: TextView = view.findViewById(R.id.comment_action)
         val likeActionView: TextView = view.findViewById(R.id.like_action)
-        // ## TAMBAHAN BARU: Referensi ke TextView untuk waktu ##
         val postTimeTextView: TextView = view.findViewById(R.id.post_time)
     }
 
@@ -33,15 +32,13 @@ class NewsAdapter(private var articleList: List<Article>) : RecyclerView.Adapter
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
         val currentArticle = articleList[position]
 
-        // Mengisi data teks
+        // Mengisi semua data ke dalam view
         holder.authorNameTextView.text = currentArticle.authorName
         holder.postTextView.text = currentArticle.title
         holder.likeActionView.text = currentArticle.likeCount.toString()
-
-        // ## TAMBAHAN BARU: Menampilkan waktu yang sudah diformat ##
         holder.postTimeTextView.text = formatTimeAgo(currentArticle.createdAt)
+        holder.commentActionView.text = currentArticle.commentCount.toString() // <-- Baris ini memastikan jumlah komentar tampil
 
-        // Memuat gambar dari URL
         Glide.with(holder.itemView.context)
             .load(currentArticle.imageUrl)
             .placeholder(R.drawable.news_placeholder_1)
