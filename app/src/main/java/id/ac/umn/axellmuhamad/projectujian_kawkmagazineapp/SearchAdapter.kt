@@ -32,14 +32,16 @@ class SearchAdapter(private var results: List<Article>) : RecyclerView.Adapter<S
             .placeholder(R.drawable.news_placeholder_1)
             .into(holder.imageView)
 
+        // ## BAGIAN YANG DIPERBAIKI: Mengirim ID Artikel ##
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, ArticleDetailActivity::class.java).apply {
+                putExtra("ARTICLE_ID", article.id) // <-- BARIS PENTING YANG DITAMBAHKAN
                 putExtra("ARTICLE_TITLE", article.title)
                 putExtra("ARTICLE_CONTENT", article.content)
                 putExtra("ARTICLE_IMAGE_URL", article.imageUrl)
                 putExtra("ARTICLE_TIMESTAMP", article.createdAt)
-                putExtra("ARTICLE_AUTHOR", article.authorName) // <-- Tambahan baru
+                putExtra("ARTICLE_AUTHOR", article.authorName)
             }
             context.startActivity(intent)
         }

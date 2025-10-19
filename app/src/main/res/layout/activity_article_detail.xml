@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,68 +8,140 @@
     tools:context=".ArticleDetailActivity">
 
     <LinearLayout
+        android:id="@+id/reply_section"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:background="@color/dark_surface"
+        android:padding="8dp"
+        android:gravity="center_vertical">
 
-        <ImageView
-            android:id="@+id/article_image_detail"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:scaleType="centerCrop"
-            tools:src="@drawable/news_placeholder_1"
-            android:contentDescription="Gambar Artikel" />
-
-        <TextView
-            android:id="@+id/article_title_detail"
-            android:layout_width="match_parent"
+        <EditText
+            android:id="@+id/detail_reply_edittext"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Leave a reply..."
+            android:textColorHint="@color/dark_text_secondary"
             android:textColor="@color/dark_text_primary"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="16dp"
-            tools:text="Judul Artikel Akan Muncul di Sini" />
+            android:background="@android:color/transparent"
+            android:padding="8dp"/>
+
+        <Button
+            android:id="@+id/detail_post_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Post"
+            app:backgroundTint="@color/dark_orange_accent"
+            style="@style/Widget.MaterialComponents.Button.TextButton"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/reply_section">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="16dp"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
+
+            <ImageView
+                android:id="@+id/article_image_detail"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:scaleType="centerCrop"
+                tools:src="@drawable/news_placeholder_1"
+                android:contentDescription="Gambar Artikel" />
 
             <TextView
-                android:id="@+id/article_author_detail"
-                android:layout_width="wrap_content"
+                android:id="@+id/article_title_detail"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/dark_text_primary"
-                android:textSize="14sp"
+                android:textSize="24sp"
                 android:textStyle="bold"
-                tools:text="Nama Penulis" />
+                android:paddingHorizontal="16dp"
+                android:paddingTop="16dp"
+                tools:text="Judul Artikel" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="16dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/article_author_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/dark_text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="Nama Penulis" />
+
+                <TextView
+                    android:id="@+id/article_timestamp_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/dark_text_secondary"
+                    android:textSize="14sp"
+                    android:layout_marginStart="8dp"
+                    tools:text="• 19 Oktober 2025, 18:56" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/article_timestamp_detail"
-                android:layout_width="wrap_content"
+                android:id="@+id/article_content_detail"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/dark_text_secondary"
-                android:textSize="14sp"
-                android:layout_marginStart="8dp"
-                tools:text="• 19 Oktober 2025, 18:56" />
+                android:textSize="16sp"
+                android:lineSpacingExtra="4dp"
+                android:padding="16dp"
+                tools:text="Isi konten artikel..." />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/like_article_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Like Article"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="16dp"
+                app:icon="@drawable/ic_heart_outline"
+                app:iconTint="@color/white"
+                app:backgroundTint="@color/dark_orange_accent"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/dark_surface"
+                android:layout_marginHorizontal="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Comments"
+                android:textColor="@color/dark_text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/detail_comments_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/item_comment"
+                tools:itemCount="2"
+                android:paddingBottom="16dp"/>
 
         </LinearLayout>
+    </ScrollView>
 
-        <TextView
-            android:id="@+id/article_content_detail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/dark_text_secondary"
-            android:textSize="16sp"
-            android:lineSpacingExtra="4dp"
-            android:paddingHorizontal="16dp"
-            android:paddingBottom="16dp"
-            tools:text="Isi konten artikel akan muncul di sini..." />
-
-    </LinearLayout>
-</ScrollView>
+</RelativeLayout>

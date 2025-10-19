@@ -50,7 +50,8 @@ class NewsAdapter(private var articleList: List<Article>) : RecyclerView.Adapter
                 putExtra("ARTICLE_CONTENT", currentArticle.content)
                 putExtra("ARTICLE_IMAGE_URL", currentArticle.imageUrl)
                 putExtra("ARTICLE_TIMESTAMP", currentArticle.createdAt)
-                putExtra("ARTICLE_AUTHOR", currentArticle.authorName) // <-- Tambahan baru
+                putExtra("ARTICLE_AUTHOR", currentArticle.authorName)
+                putExtra("ARTICLE_ID", currentArticle.id)
             }
             context.startActivity(intent)
         }
