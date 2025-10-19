@@ -21,20 +21,22 @@ class ArticleDetailActivity : AppCompatActivity() {
         val titleView: TextView = findViewById(R.id.article_title_detail)
         val timestampView: TextView = findViewById(R.id.article_timestamp_detail)
         val contentView: TextView = findViewById(R.id.article_content_detail)
+        val authorView: TextView = findViewById(R.id.article_author_detail) // <-- Tambahan baru
 
         // Ambil data yang dikirim dari adapter
         val title = intent.getStringExtra("ARTICLE_TITLE")
         val contentHtml = intent.getStringExtra("ARTICLE_CONTENT")
         val imageUrl = intent.getStringExtra("ARTICLE_IMAGE_URL")
         val timestamp = intent.getParcelableExtra<Timestamp>("ARTICLE_TIMESTAMP")
+        val authorName = intent.getStringExtra("ARTICLE_AUTHOR") // <-- Tambahan baru
 
         // Tampilkan data ke komponen view
         titleView.text = title
+        authorView.text = authorName // <-- Tambahan baru
 
-        // ## BAGIAN YANG DIPERBAIKI: Format dan tampilkan timestamp dengan jam ##
+        // Format dan tampilkan timestamp dengan jam
         if (timestamp != null) {
-            // Ubah format tanggal untuk menyertakan jam dan menit (HH:mm)
-            val sdf = SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale.getDefault())
+            val sdf = SimpleDateFormat("• dd MMMM yyyy, HH:mm", Locale.getDefault())
             timestampView.text = sdf.format(timestamp.toDate())
         }
 

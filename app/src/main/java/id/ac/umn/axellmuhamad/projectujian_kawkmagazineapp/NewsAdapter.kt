@@ -32,19 +32,17 @@ class NewsAdapter(private var articleList: List<Article>) : RecyclerView.Adapter
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
         val currentArticle = articleList[position]
 
-        // Mengisi semua data ke dalam view
         holder.authorNameTextView.text = currentArticle.authorName
         holder.postTextView.text = currentArticle.title
         holder.likeActionView.text = currentArticle.likeCount.toString()
         holder.postTimeTextView.text = formatTimeAgo(currentArticle.createdAt)
-        holder.commentActionView.text = currentArticle.commentCount.toString() // <-- Baris ini memastikan jumlah komentar tampil
+        holder.commentActionView.text = currentArticle.commentCount.toString()
 
         Glide.with(holder.itemView.context)
             .load(currentArticle.imageUrl)
             .placeholder(R.drawable.news_placeholder_1)
             .into(holder.postImageView)
 
-        // --- Logika Klik ---
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, ArticleDetailActivity::class.java).apply {
@@ -52,6 +50,7 @@ class NewsAdapter(private var articleList: List<Article>) : RecyclerView.Adapter
                 putExtra("ARTICLE_CONTENT", currentArticle.content)
                 putExtra("ARTICLE_IMAGE_URL", currentArticle.imageUrl)
                 putExtra("ARTICLE_TIMESTAMP", currentArticle.createdAt)
+                putExtra("ARTICLE_AUTHOR", currentArticle.authorName) // <-- Tambahan baru
             }
             context.startActivity(intent)
         }

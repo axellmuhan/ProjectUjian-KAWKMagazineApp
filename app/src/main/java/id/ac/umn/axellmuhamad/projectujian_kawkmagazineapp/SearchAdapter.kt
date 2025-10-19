@@ -29,18 +29,17 @@ class SearchAdapter(private var results: List<Article>) : RecyclerView.Adapter<S
 
         Glide.with(holder.itemView.context)
             .load(article.imageUrl)
-            .placeholder(R.drawable.news_placeholder_1) // Menggunakan placeholder yang sudah ada
+            .placeholder(R.drawable.news_placeholder_1)
             .into(holder.imageView)
 
-        // Membuat seluruh item bisa diklik untuk membuka detail
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, ArticleDetailActivity::class.java).apply {
                 putExtra("ARTICLE_TITLE", article.title)
                 putExtra("ARTICLE_CONTENT", article.content)
                 putExtra("ARTICLE_IMAGE_URL", article.imageUrl)
-                // ## TAMBAHKAN BARIS INI UNTUK MENGIRIM TIMESTAMP ##
                 putExtra("ARTICLE_TIMESTAMP", article.createdAt)
+                putExtra("ARTICLE_AUTHOR", article.authorName) // <-- Tambahan baru
             }
             context.startActivity(intent)
         }
