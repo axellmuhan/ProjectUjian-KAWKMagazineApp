@@ -6,4 +6,13 @@
     </style>
 
     <style name="Theme.ProjectUjianKAWKMagazineApp" parent="Base.Theme.ProjectUjianKAWKMagazineApp" />
+    <style name="ChipTag">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/chip_tag_background</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:paddingVertical">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+    </style>
 </resources>

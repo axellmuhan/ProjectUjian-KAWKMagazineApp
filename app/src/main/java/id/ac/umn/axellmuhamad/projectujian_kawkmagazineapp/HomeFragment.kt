@@ -1,5 +1,6 @@
-package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp
+package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp // Sesuaikan
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -8,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
@@ -16,54 +18,63 @@ class HomeFragment : Fragment() {
     private lateinit var newsAdapter: NewsAdapter
     private lateinit var firestore: FirebaseFirestore
     private lateinit var newsRecyclerView: RecyclerView
+    private val articleList = mutableListOf<Article>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Menghubungkan file Kotlin ini dengan layout XML-nya
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Inisialisasi Firestore
         firestore = FirebaseFirestore.getInstance()
 
-        // 2. Setup RecyclerView
         newsRecyclerView = view.findViewById(R.id.news_recyclerview)
         newsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        // Buat adapter dengan list kosong terlebih dahulu
-        // Kita akan isi datanya nanti dari Firestore
-        newsAdapter = NewsAdapter(emptyList())
+        newsAdapter = NewsAdapter(articleList)
         newsRecyclerView.adapter = newsAdapter
 
-        // 3. Panggil fungsi untuk mulai mengambil data
         fetchArticlesFromFirestore()
+
+        val fabNewPost: FloatingActionButton = view.findViewById(R.id.fab_new_post)
+        fabNewPost.setOnClickListener {
+            val intent = Intent(requireActivity(), NewPostActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun fetchArticlesFromFirestore() {
-        // Mengambil data dari koleksi "articles"
         firestore.collection("articles")
-            // Mengurutkan berdasarkan waktu dibuat, dari yang terbaru ke terlama
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, error ->
-
-                // Jika ada error saat mengambil data, hentikan dan catat di Logcat
                 if (error != null) {
                     Log.e("HomeFragment", "Error listening for article changes", error)
                     return@addSnapshotListener
                 }
 
-                // Jika data berhasil diambil (tidak null)
                 if (snapshots != null) {
-                    // Ubah semua dokumen dari Firestore menjadi List<Article>
-                    val articleList = snapshots.toObjects(Article::class.java)
+                    // ## BAGIAN YANG DIPERBARUI: Mengambil ID Dokumen ##
+                    // Kita perlu iterasi manual untuk mendapatkan ID setiap dokumen.
+                    val fetchedArticles = mutableListOf<Article>()
+                    for (document in snapshots.documents) {
+                        // Ubah dokumen menjadi objek Article
+                        val article = document.toObject(Article::class.java)
+                        if (article != null) {
+                            // Simpan ID dokumen ke dalam objek Article
+                            article.id = document.id
+                            fetchedArticles.add(article)
+                        }
+                    }
 
-                    // Kirim data baru ke adapter agar ditampilkan di RecyclerView
-                    newsAdapter.setData(articleList)
+                    // Kosongkan list lama dan isi dengan data baru
+                    articleList.clear()
+                    articleList.addAll(fetchedArticles)
+
+                    // Beri tahu adapter bahwa data telah berubah
+                    newsAdapter.notifyDataSetChanged()
                 }
             }
     }

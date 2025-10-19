@@ -9,6 +9,7 @@
     tools:context=".SearchFragment">
 
     <EditText
+        android:id="@+id/search_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Search"
@@ -18,39 +19,33 @@
         android:padding="12dp"
         android:layout_margin="16dp"
         android:drawableStart="@drawable/ic_search"
-        android:drawablePadding="8dp"/>
+        android:drawablePadding="8dp"
+        android:maxLines="1"
+        android:inputType="text"/>
 
-    <com.google.android.material.card.MaterialCardView
+    <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        app:cardCornerRadius="16dp"
-        android:layout_marginHorizontal="16dp">
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_marginTop="8dp">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/news_placeholder_1"
-                android:scaleType="centerCrop"/>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:background="@drawable/gradient_black_transparent"
-                android:layout_gravity="bottom"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="High School Volleyball Roundup regional results"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_gravity="bottom"
-                android:padding="12dp"/>
-        </FrameLayout>
-    </com.google.android.material.card.MaterialCardView>
+            <TextView android:id="@+id/tag_gaya_hidup" style="@style/ChipTag" android:text="gaya hidup"/>
+            <TextView android:id="@+id/tag_olahraga" style="@style/ChipTag" android:text="olahraga"/>
+            <TextView android:id="@+id/tag_lari" style="@style/ChipTag" android:text="lari"/>
+            <TextView android:id="@+id/tag_kesehatan" style="@style/ChipTag" android:text="kesehatan"/>
+            <TextView android:id="@+id/tag_sains" style="@style/ChipTag" android:text="sains"/>
+            <TextView android:id="@+id/tag_teknologi" style="@style/ChipTag" android:text="teknologi"/>
+            <TextView android:id="@+id/tag_travel" style="@style/ChipTag" android:text="travel"/>
+            <TextView android:id="@+id/tag_kuliner" style="@style/ChipTag" android:text="kuliner"/>
+
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_news_recyclerview"

@@ -55,5 +55,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.analytics)
     implementation(libs.glide)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(platform("com.google.firebase:firebase-bom:33.1.1")) // Pastikan BOM sudah ada
+    implementation("com.google.firebase:firebase-storage-ktx")
     ksp(libs.glide.ksp)
 }
