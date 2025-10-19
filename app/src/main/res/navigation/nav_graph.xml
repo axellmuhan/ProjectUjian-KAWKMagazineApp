@@ -49,8 +49,8 @@
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" />
     <fragment
-        android:id="@+id/comingSoonFragment"
-        android:name="id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp.ComingSoonFragment"
-        android:label="fragment_coming_soon"
-        tools:layout="@layout/fragment_coming_soon" />
+        android:id="@+id/discussionFragment"
+        android:name="id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp.DiscussionFragment"
+        android:label="fragment_discussion"
+        tools:layout="@layout/fragment_discussion" />
 </navigation>
