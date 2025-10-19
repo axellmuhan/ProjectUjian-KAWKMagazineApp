@@ -9,7 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide // <-- Pastikan import ini ada
+import com.bumptech.glide.Glide
 import com.google.firebase.firestore.FirebaseFirestore
 
 class NewsAdapter(private var articleList: List<Article>) : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
@@ -20,6 +20,8 @@ class NewsAdapter(private var articleList: List<Article>) : RecyclerView.Adapter
         val postImageView: ImageView = view.findViewById(R.id.post_image)
         val commentActionView: TextView = view.findViewById(R.id.comment_action)
         val likeActionView: TextView = view.findViewById(R.id.like_action)
+        // ## TAMBAHAN BARU: Referensi ke TextView untuk waktu ##
+        val postTimeTextView: TextView = view.findViewById(R.id.post_time)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsViewHolder {
@@ -36,11 +38,14 @@ class NewsAdapter(private var articleList: List<Article>) : RecyclerView.Adapter
         holder.postTextView.text = currentArticle.title
         holder.likeActionView.text = currentArticle.likeCount.toString()
 
-        // ## BAGIAN YANG DIPERBARUI: MEMUAT GAMBAR DARI URL ##
+        // ## TAMBAHAN BARU: Menampilkan waktu yang sudah diformat ##
+        holder.postTimeTextView.text = formatTimeAgo(currentArticle.createdAt)
+
+        // Memuat gambar dari URL
         Glide.with(holder.itemView.context)
-            .load(currentArticle.imageUrl) // <-- Ambil URL dari objek Article
-            .placeholder(R.drawable.news_placeholder_1) // Gambar sementara saat loading
-            .into(holder.postImageView) // Masukkan gambar ke ImageView
+            .load(currentArticle.imageUrl)
+            .placeholder(R.drawable.news_placeholder_1)
+            .into(holder.postImageView)
 
         // --- Logika Klik ---
         holder.itemView.setOnClickListener {
@@ -49,6 +54,7 @@ class NewsAdapter(private var articleList: List<Article>) : RecyclerView.Adapter
                 putExtra("ARTICLE_TITLE", currentArticle.title)
                 putExtra("ARTICLE_CONTENT", currentArticle.content)
                 putExtra("ARTICLE_IMAGE_URL", currentArticle.imageUrl)
+                putExtra("ARTICLE_TIMESTAMP", currentArticle.createdAt)
             }
             context.startActivity(intent)
         }

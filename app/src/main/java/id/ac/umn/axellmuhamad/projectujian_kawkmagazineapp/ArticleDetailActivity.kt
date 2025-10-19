@@ -7,6 +7,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class ArticleDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,15 +19,24 @@ class ArticleDetailActivity : AppCompatActivity() {
         // Cari semua komponen view dari layout
         val imageView: ImageView = findViewById(R.id.article_image_detail)
         val titleView: TextView = findViewById(R.id.article_title_detail)
+        val timestampView: TextView = findViewById(R.id.article_timestamp_detail)
         val contentView: TextView = findViewById(R.id.article_content_detail)
 
         // Ambil data yang dikirim dari adapter
         val title = intent.getStringExtra("ARTICLE_TITLE")
         val contentHtml = intent.getStringExtra("ARTICLE_CONTENT")
         val imageUrl = intent.getStringExtra("ARTICLE_IMAGE_URL")
+        val timestamp = intent.getParcelableExtra<Timestamp>("ARTICLE_TIMESTAMP")
 
         // Tampilkan data ke komponen view
         titleView.text = title
+
+        // ## BAGIAN YANG DIPERBAIKI: Format dan tampilkan timestamp dengan jam ##
+        if (timestamp != null) {
+            // Ubah format tanggal untuk menyertakan jam dan menit (HH:mm)
+            val sdf = SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale.getDefault())
+            timestampView.text = sdf.format(timestamp.toDate())
+        }
 
         // Menampilkan konten yang formatnya HTML
         if (contentHtml != null) {
@@ -39,7 +51,7 @@ class ArticleDetailActivity : AppCompatActivity() {
         // Memuat gambar dari URL menggunakan Glide
         Glide.with(this)
             .load(imageUrl)
-            .placeholder(R.drawable.news_placeholder_1) // Gambar sementara saat loading
+            .placeholder(R.drawable.news_placeholder_1)
             .into(imageView)
     }
 }

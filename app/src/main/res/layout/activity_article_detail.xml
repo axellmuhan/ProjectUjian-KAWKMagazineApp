@@ -26,8 +26,20 @@
             android:textColor="@color/dark_text_primary"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:padding="16dp"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
             tools:text="Judul Artikel Akan Muncul di Sini" />
+
+        <TextView
+            android:id="@+id/article_timestamp_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/dark_text_secondary"
+            android:textSize="14sp"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp"
+            tools:text="19 Oktober 2025" />
 
         <TextView
             android:id="@+id/article_content_detail"
