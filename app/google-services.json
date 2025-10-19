@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "303927422135",
+    "project_id": "kawk-magazine-app",
+    "storage_bucket": "kawk-magazine-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:303927422135:android:04274970ad4bf4ac723132",
+        "android_client_info": {
+          "package_name": "id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCP_2Yv3i0PFhx-4I3FBZZVy63boFH6ag"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
