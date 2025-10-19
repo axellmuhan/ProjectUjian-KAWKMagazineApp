@@ -59,4 +59,5 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.1")) // Pastikan BOM sudah ada
     implementation("com.google.firebase:firebase-storage-ktx")
     ksp(libs.glide.ksp)
+    implementation("de.hdodenhof:circleimageview:3.1.0")
 }

@@ -1,14 +1,195 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?attr/colorPrimary"
     tools:context=".ProfileFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/top_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="?attr/actionBarSize"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-</FrameLayout>
+        <ImageView
+            android:id="@+id/back_arrow"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_back_arrow"
+            app:tint="?attr/colorOnPrimary"
+            android:contentDescription="@string/desc_back_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:id="@+id/profile_header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/profile_header_title"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <ImageView
+            android:id="@+id/notification_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_notification"
+            app:tint="?attr/colorOnPrimary"
+            android:contentDescription="@string/desc_notification_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/profile_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="@color/primary_light"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/top_bar_layout">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_profile_dummy"
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/accent_orange"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="@string/desc_profile_image"/>
+
+        <TextView
+            android:id="@+id/profile_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/profile_dummy_name"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="@id/profile_image"
+            app:layout_constraintStart_toEndOf="@id/profile_image"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <TextView
+            android:id="@+id/profile_bio"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:text="@string/profile_dummy_bio"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/profile_name"
+            app:layout_constraintStart_toEndOf="@id/profile_image"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <Button
+            android:id="@+id/edit_profile_button"
+            style="@style/Widget.App.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/profile_edit_button"
+            android:textSize="12sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            app:cornerRadius="8dp"
+            app:layout_constraintTop_toBottomOf="@id/profile_bio"
+            app:layout_constraintStart_toStartOf="@id/profile_name"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/general_settings_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/profile_general_settings"
+        android:textColor="?attr/colorOnPrimary"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="24dp"
+        app:layout_constraintTop_toBottomOf="@id/profile_header"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <LinearLayout
+        android:id="@+id/general_settings_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@id/general_settings_header">
+
+        <TextView
+            android:id="@+id/my_articles_option"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="@string/profile_my_articles"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="18sp"
+            app:drawableStartCompat="@drawable/ic_article"
+            android:drawablePadding="16dp"
+            app:drawableEndCompat="@drawable/ic_arrow_right"
+            app:drawableTint="?attr/colorOnPrimary"
+            android:gravity="center_vertical"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/primary_light"
+            android:layout_marginStart="56dp"/>
+
+        <TextView
+            android:id="@+id/saved_items_option"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="@string/profile_saved_items"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="18sp"
+            app:drawableStartCompat="@drawable/ic_bookmark"
+            android:drawablePadding="16dp"
+            app:drawableEndCompat="@drawable/ic_arrow_right"
+            app:drawableTint="?attr/colorOnPrimary"
+            android:gravity="center_vertical"/>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/logout_button"
+        style="@style/Widget.App.Button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/profile_logout_button"
+        app:cornerRadius="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

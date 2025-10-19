@@ -1,5 +1,17 @@
 <resources>
     <string name="app_name">Project Ujian - KAWK Magazine App</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="profile_header_title">Profile</string>
+    <string name="profile_dummy_name">Axell Muhamad</string>
+    <string name="profile_dummy_bio">Student at UMN | Android Dev Enthusiast | Exploring new tech.</string>
+    <string name="profile_edit_button">Edit Profile</string>
+    <string name="profile_general_settings">General Settings</string>
+    <string name="profile_my_articles">My Articles</string>
+    <string name="profile_saved_items">Saved Items</string>
+    <string name="profile_logout_button">Logout</string>
+
+    <string name="desc_back_button">Back button</string>
+    <string name="desc_notification_button">Notifications</string>
+    <string name="desc_profile_image">User profile image</string>
 </resources>
