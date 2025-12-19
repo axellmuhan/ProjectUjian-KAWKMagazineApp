@@ -50,7 +50,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -66,7 +65,7 @@
             android:id="@+id/profile_image"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:src="@drawable/ic_profile_dummy"
+            android:src="@drawable/ic_profile"
             app:civ_border_width="2dp"
             app:civ_border_color="@color/accent_orange"
             app:layout_constraintTop_toTopOf="parent"
@@ -81,7 +80,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="@string/profile_dummy_name"
+            tools:text="Axell Muhamad"
             android:textColor="?attr/colorOnPrimary"
             android:textSize="22sp"
             android:textStyle="bold"
@@ -95,7 +94,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
-            android:text="@string/profile_dummy_bio"
+            tools:text="Student at UMN | Android Dev Enthusiast"
             android:textColor="?attr/colorOnPrimary"
             android:textSize="14sp"
             app:layout_constraintTop_toBottomOf="@id/profile_name"
@@ -175,7 +174,6 @@
             app:drawableEndCompat="@drawable/ic_arrow_right"
             app:drawableTint="?attr/colorOnPrimary"
             android:gravity="center_vertical"/>
-
     </LinearLayout>
 
     <Button

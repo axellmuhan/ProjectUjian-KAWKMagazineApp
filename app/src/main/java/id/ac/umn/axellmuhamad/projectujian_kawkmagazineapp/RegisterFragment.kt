@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp.model.User
 
 class RegisterFragment : Fragment() {
 
@@ -46,23 +47,26 @@ class RegisterFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // 1. Buat akun di Firebase Authentication
+            // 1. Buat akun di Firebase Authentication (Login System)
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener { authResult ->
-                    // Jika berhasil, dapatkan UID pengguna baru
+
+                    // Jika berhasil, ambil UID (ID Unik) yang baru saja dibuat
                     val uid = authResult.user?.uid
+
                     if (uid != null) {
-                        // 2. Buat dokumen profil di Firestore
+                        // 2. Siapkan data untuk Tabel Users (Firestore Database)
                         val newUser = User(
                             displayName = name,
                             email = email,
-                            role = "reader", // Set peran default
+                            role = "reader",
                             bio = "Pengguna baru KAWK Magazine App!"
                         )
 
+                        // 3. Simpan ke Firestore menggunakan UID yang SAMA
+                        // Inilah yang membuat data login "menyambung" ke tabel user
                         firestore.collection("users").document(uid).set(newUser)
                             .addOnSuccessListener {
-                                // Jika profil berhasil disimpan
                                 Toast.makeText(context, "Registrasi Berhasil!", Toast.LENGTH_SHORT).show()
                                 findNavController().navigate(R.id.homeFragment)
                             }

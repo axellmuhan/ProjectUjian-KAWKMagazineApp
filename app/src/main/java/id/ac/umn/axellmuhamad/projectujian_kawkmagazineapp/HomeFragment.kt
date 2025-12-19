@@ -34,7 +34,9 @@ class HomeFragment : Fragment() {
 
         newsRecyclerView = view.findViewById(R.id.news_recyclerview)
         newsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        newsAdapter = NewsAdapter(articleList)
+
+        // [PERBAIKAN 1] Tambahkan requireContext() di sini
+        newsAdapter = NewsAdapter(articleList, requireContext())
         newsRecyclerView.adapter = newsAdapter
 
         fetchArticlesFromFirestore()
@@ -43,6 +45,14 @@ class HomeFragment : Fragment() {
         fabNewPost.setOnClickListener {
             val intent = Intent(requireActivity(), NewPostActivity::class.java)
             startActivity(intent)
+        }
+    }
+
+    // [PERBAIKAN 2] Bersihkan ML agar tidak bocor memori
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (::newsAdapter.isInitialized) {
+            newsAdapter.releaseResources()
         }
     }
 
@@ -56,25 +66,18 @@ class HomeFragment : Fragment() {
                 }
 
                 if (snapshots != null) {
-                    // ## BAGIAN YANG DIPERBARUI: Mengambil ID Dokumen ##
-                    // Kita perlu iterasi manual untuk mendapatkan ID setiap dokumen.
+                    // Kita gunakan setData() milik Adapter agar lebih rapi
                     val fetchedArticles = mutableListOf<Article>()
                     for (document in snapshots.documents) {
-                        // Ubah dokumen menjadi objek Article
                         val article = document.toObject(Article::class.java)
                         if (article != null) {
-                            // Simpan ID dokumen ke dalam objek Article
                             article.id = document.id
                             fetchedArticles.add(article)
                         }
                     }
 
-                    // Kosongkan list lama dan isi dengan data baru
-                    articleList.clear()
-                    articleList.addAll(fetchedArticles)
-
-                    // Beri tahu adapter bahwa data telah berubah
-                    newsAdapter.notifyDataSetChanged()
+                    // Panggil fungsi setData di adapter
+                    newsAdapter.setData(fetchedArticles)
                 }
             }
     }

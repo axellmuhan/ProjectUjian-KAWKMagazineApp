@@ -60,4 +60,8 @@ dependencies {
     implementation("com.google.firebase:firebase-storage-ktx")
     ksp(libs.glide.ksp)
     implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("org.tensorflow:tensorflow-lite:2.17.0") // Library TFLite Standar
+    implementation("org.tensorflow:tensorflow-lite-select-tf-ops:2.16.1") // Library ini berisi "kamus" untuk operasi teks (Regex, dll)
+    implementation("org.tensorflow:tensorflow-lite-support:0.5.0")
+    implementation("org.tensorflow:tensorflow-lite-metadata:0.5.0")
 }

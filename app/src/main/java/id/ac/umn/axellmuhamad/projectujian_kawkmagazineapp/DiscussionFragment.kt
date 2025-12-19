@@ -34,7 +34,9 @@ class DiscussionFragment : Fragment() {
 
         newsRecyclerView = view.findViewById(R.id.news_recyclerview)
         newsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        newsAdapter = NewsAdapter(articleList)
+
+        // [UBAH 1] Kirim requireContext() ke adapter agar ML bisa jalan
+        newsAdapter = NewsAdapter(articleList, requireContext())
         newsRecyclerView.adapter = newsAdapter
 
         fetchArticlesFromFirestore()
@@ -46,6 +48,15 @@ class DiscussionFragment : Fragment() {
         }
     }
 
+    // [UBAH 2] Tambahkan ini untuk menutup model ML saat pindah fragment/halaman
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Cek apakah adapter sudah dibuat sebelum memanggil releaseResources
+        if (::newsAdapter.isInitialized) {
+            newsAdapter.releaseResources()
+        }
+    }
+
     private fun fetchArticlesFromFirestore() {
         firestore.collection("articles")
             // Urutkan berdasarkan jumlah komentar, dari yang paling banyak ke paling sedikit
@@ -53,13 +64,15 @@ class DiscussionFragment : Fragment() {
             .addSnapshotListener { snapshots, error ->
 
                 if (error != null) {
-                    Log.e("DiscussionFragment", "Error fetching articles", error) // Ganti tag log
+                    Log.e("DiscussionFragment", "Error fetching articles", error)
                     return@addSnapshotListener
                 }
 
                 if (snapshots != null) {
-                    val articleList = snapshots.toObjects(Article::class.java)
-                    newsAdapter.setData(articleList)
+                    // Pastikan variable lokal tidak menimpa variable class 'articleList'
+                    // Lebih aman langsung gunakan parameter setData
+                    val fetchedArticles = snapshots.toObjects(Article::class.java)
+                    newsAdapter.setData(fetchedArticles)
                 }
             }
     }
