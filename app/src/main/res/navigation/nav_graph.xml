@@ -53,4 +53,8 @@
         android:name="id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp.DiscussionFragment"
         android:label="fragment_discussion"
         tools:layout="@layout/fragment_discussion" />
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp.EditProfileFragment"
+        android:label="EditProfileFragment" />
 </navigation>
