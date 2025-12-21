@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class NewsAdapter(
@@ -21,12 +22,13 @@ class NewsAdapter(
 ) : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
 
     private val sentimentHelper = SentimentHelper(context)
+    private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
 
     class NewsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val authorName: TextView = view.findViewById(R.id.author_name)
         val postText: TextView = view.findViewById(R.id.post_text)
         val postImage: ImageView = view.findViewById(R.id.post_image)
-        val postTime: TextView = view.findViewById(R.id.post_time)
         val sentimentBadge: TextView = view.findViewById(R.id.tv_sentiment_badge)
         val likeAction: TextView = view.findViewById(R.id.like_action)
         val commentAction: TextView = view.findViewById(R.id.comment_action)
@@ -39,81 +41,79 @@ class NewsAdapter(
     }
 
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
-        val currentArticle = articleList[position]
+        val article = articleList[position]
+        val user = auth.currentUser
 
-        holder.authorName.text = currentArticle.authorName
-        holder.postText.text = currentArticle.title
-        holder.likeAction.text = currentArticle.likeCount.toString()
-        holder.commentAction.text = currentArticle.commentCount.toString()
+        holder.authorName.text = article.authorName
+        holder.postText.text = article.title
+        holder.likeAction.text = article.likeCount.toString()
+        holder.commentAction.text = article.commentCount.toString()
 
-        // --- Logika Sentiment Analysis ---
-        val textToAnalyze = currentArticle.title ?: ""
-        if (textToAnalyze.isNotEmpty()) {
-            val result = sentimentHelper.predict(textToAnalyze)
-            holder.sentimentBadge.text = result
-            holder.sentimentBadge.visibility = View.VISIBLE
-            when {
-                result.contains("Positif") -> holder.sentimentBadge.setBackgroundColor(Color.parseColor("#2E7D32"))
-                result.contains("Negatif") -> holder.sentimentBadge.setBackgroundColor(Color.parseColor("#C62828"))
-                else -> holder.sentimentBadge.setBackgroundColor(Color.parseColor("#455A64"))
-            }
+        // Sentiment Logic
+        val result = sentimentHelper.predict(article.title)
+        holder.sentimentBadge.text = result
+        holder.sentimentBadge.visibility = View.VISIBLE
+        when {
+            result.contains("Positif") -> holder.sentimentBadge.setBackgroundColor(Color.parseColor("#2E7D32"))
+            result.contains("Negatif") -> holder.sentimentBadge.setBackgroundColor(Color.parseColor("#C62828"))
+            else -> holder.sentimentBadge.setBackgroundColor(Color.parseColor("#455A64"))
         }
 
-        // --- [PENTING] Logika Toggle Save / Unsave ---
-        holder.saveAction.setOnClickListener {
-            val user = FirebaseAuth.getInstance().currentUser
-            if (user != null) {
-                val db = FirebaseFirestore.getInstance()
-                val docRef = db.collection("users").document(user.uid)
-                    .collection("saved_articles").document(currentArticle.id)
+        // Bookmark Icon
+        holder.saveAction.setImageResource(R.drawable.ic_bookmark_outline)
 
-                docRef.get().addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        // JIKA SUDAH ADA -> HAPUS (UNSAVE)
-                        docRef.delete().addOnSuccessListener {
-                            Toast.makeText(context, "Berita dihapus dari simpanan", Toast.LENGTH_SHORT).show()
-
-                            // Jika sedang di halaman SavedArticlesActivity, langsung hapus dari list UI
-                            if (context is SavedArticlesActivity) {
-                                val currentList = articleList.toMutableList()
-                                currentList.removeAt(position)
-                                setData(currentList)
-                            }
-                        }
-                    } else {
-                        // JIKA BELUM ADA -> SIMPAN (SAVE)
-                        docRef.set(currentArticle).addOnSuccessListener {
-                            Toast.makeText(context, "Berita berhasil disimpan!", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            } else {
-                Toast.makeText(context, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        Glide.with(context).load(currentArticle.imageUrl).placeholder(R.drawable.news_placeholder_1).into(holder.postImage)
-
+        // Klik Berita ke Detail
         holder.itemView.setOnClickListener {
             val intent = Intent(context, ArticleDetailActivity::class.java).apply {
-                putExtra("ARTICLE_TITLE", currentArticle.title)
-                putExtra("ARTICLE_CONTENT", currentArticle.content)
-                putExtra("ARTICLE_IMAGE_URL", currentArticle.imageUrl)
-                putExtra("ARTICLE_AUTHOR", currentArticle.authorName)
-                putExtra("ARTICLE_ID", currentArticle.id)
+                putExtra("ARTICLE_ID", article.id)
+                putExtra("ARTICLE_TITLE", article.title)
+                putExtra("ARTICLE_CONTENT", article.content)
+                putExtra("ARTICLE_IMAGE_URL", article.imageUrl)
+                putExtra("ARTICLE_AUTHOR", article.authorName)
+                putExtra("ARTICLE_TIMESTAMP", article.createdAt)
             }
             context.startActivity(intent)
         }
+
+        // Like Logic
+        holder.likeAction.setOnClickListener {
+            if (article.id.isNotEmpty()) {
+                db.collection("articles").document(article.id).update("likeCount", FieldValue.increment(1))
+            }
+        }
+
+        // --- FIXED: Manggil CommentBottomSheetFragment lo ---
+        holder.commentAction.setOnClickListener {
+            if (article.id.isNotEmpty()) {
+                val commentSheet = CommentBottomSheetFragment.newInstance(article.id)
+                val fragmentManager = (context as AppCompatActivity).supportFragmentManager
+                commentSheet.show(fragmentManager, "CommentBottomSheet")
+            }
+        }
+
+        // Bookmark Logic with Toast
+        holder.saveAction.setOnClickListener {
+            if (user != null && article.id.isNotEmpty()) {
+                val docRef = db.collection("users").document(user.uid)
+                    .collection("saved_articles").document(article.id)
+                docRef.get().addOnSuccessListener { doc ->
+                    if (doc.exists()) {
+                        docRef.delete().addOnSuccessListener {
+                            Toast.makeText(context, "Removed from Bookmarks!", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        docRef.set(article).addOnSuccessListener {
+                            Toast.makeText(context, "Added to Bookmarks!", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        }
+
+        Glide.with(context).load(article.imageUrl).into(holder.postImage)
     }
 
-    override fun getItemCount(): Int = articleList.size
-
-    fun setData(newArticleList: List<Article>) {
-        this.articleList = newArticleList
-        notifyDataSetChanged()
-    }
-
-    fun releaseResources() {
-        sentimentHelper.close()
-    }
+    override fun getItemCount() = articleList.size
+    fun setData(newList: List<Article>) { articleList = newList; notifyDataSetChanged() }
+    fun releaseResources() { sentimentHelper.close() }
 }
