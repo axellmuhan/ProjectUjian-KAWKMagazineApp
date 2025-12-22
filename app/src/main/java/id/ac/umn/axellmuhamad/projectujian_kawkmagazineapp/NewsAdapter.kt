@@ -2,7 +2,7 @@ package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,12 +16,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
+// Hapus parameter ML, biarkan Context karena Bookmark butuh Context buat Toast
 class NewsAdapter(
     private var articleList: List<Article>,
     private val context: Context
 ) : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
 
-    private val sentimentHelper = SentimentHelper(context)
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
@@ -29,7 +29,6 @@ class NewsAdapter(
         val authorName: TextView = view.findViewById(R.id.author_name)
         val postText: TextView = view.findViewById(R.id.post_text)
         val postImage: ImageView = view.findViewById(R.id.post_image)
-        val sentimentBadge: TextView = view.findViewById(R.id.tv_sentiment_badge)
         val likeAction: TextView = view.findViewById(R.id.like_action)
         val commentAction: TextView = view.findViewById(R.id.comment_action)
         val saveAction: ImageView = view.findViewById(R.id.save_action)
@@ -49,21 +48,14 @@ class NewsAdapter(
         holder.likeAction.text = article.likeCount.toString()
         holder.commentAction.text = article.commentCount.toString()
 
-        // Sentiment Logic
-        val result = sentimentHelper.predict(article.title)
-        holder.sentimentBadge.text = result
-        holder.sentimentBadge.visibility = View.VISIBLE
-        when {
-            result.contains("Positif") -> holder.sentimentBadge.setBackgroundColor(Color.parseColor("#2E7D32"))
-            result.contains("Negatif") -> holder.sentimentBadge.setBackgroundColor(Color.parseColor("#C62828"))
-            else -> holder.sentimentBadge.setBackgroundColor(Color.parseColor("#455A64"))
-        }
+        // --- BAGIAN ML/SENTIMEN SUDAH DIHAPUS DI SINI ---
 
-        // Bookmark Icon
+        // Bookmark Icon Default
         holder.saveAction.setImageResource(R.drawable.ic_bookmark_outline)
 
         // Klik Berita ke Detail
         holder.itemView.setOnClickListener {
+            Log.d("NewsAdapter", "Mengirim ID Artikel: ${article.id}")
             val intent = Intent(context, ArticleDetailActivity::class.java).apply {
                 putExtra("ARTICLE_ID", article.id)
                 putExtra("ARTICLE_TITLE", article.title)
@@ -78,11 +70,12 @@ class NewsAdapter(
         // Like Logic
         holder.likeAction.setOnClickListener {
             if (article.id.isNotEmpty()) {
-                db.collection("articles").document(article.id).update("likeCount", FieldValue.increment(1))
+                db.collection("articles").document(article.id)
+                    .update("likeCount", FieldValue.increment(1))
             }
         }
 
-        // --- FIXED: Manggil CommentBottomSheetFragment lo ---
+        // Comment Logic
         holder.commentAction.setOnClickListener {
             if (article.id.isNotEmpty()) {
                 val commentSheet = CommentBottomSheetFragment.newInstance(article.id)
@@ -91,7 +84,7 @@ class NewsAdapter(
             }
         }
 
-        // Bookmark Logic with Toast
+        // --- BOOKMARK LOGIC (DIJAGA TETAP SAMA SEPERTI TEMANMU) ---
         holder.saveAction.setOnClickListener {
             if (user != null && article.id.isNotEmpty()) {
                 val docRef = db.collection("users").document(user.uid)
@@ -109,11 +102,17 @@ class NewsAdapter(
                 }
             }
         }
+        // -----------------------------------------------------------
 
-        Glide.with(context).load(article.imageUrl).into(holder.postImage)
+        Glide.with(context)
+            .load(article.imageUrl)
+            .into(holder.postImage)
     }
 
     override fun getItemCount() = articleList.size
-    fun setData(newList: List<Article>) { articleList = newList; notifyDataSetChanged() }
-    fun releaseResources() { sentimentHelper.close() }
+
+    fun setData(newList: List<Article>) {
+        articleList = newList
+        notifyDataSetChanged()
+    }
 }

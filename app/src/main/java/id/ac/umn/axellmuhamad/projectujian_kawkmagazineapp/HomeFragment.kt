@@ -48,14 +48,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-    // [PERBAIKAN 2] Bersihkan ML agar tidak bocor memori
-    override fun onDestroyView() {
-        super.onDestroyView()
-        if (::newsAdapter.isInitialized) {
-            newsAdapter.releaseResources()
-        }
-    }
-
     private fun fetchArticlesFromFirestore() {
         firestore.collection("articles")
             .orderBy("createdAt", Query.Direction.DESCENDING)

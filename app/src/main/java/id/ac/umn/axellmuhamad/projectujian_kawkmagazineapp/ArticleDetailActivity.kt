@@ -17,14 +17,15 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import java.text.SimpleDateFormat // <-- Import yang hilang
-import java.util.Locale         // <-- Import yang hilang
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class ArticleDetailActivity : AppCompatActivity() {
 
     private val db = FirebaseFirestore.getInstance()
     private lateinit var commentAdapter: CommentAdapter
-    private val commentList = mutableListOf<Comment>()
+    // Kita tidak butuh variabel lokal 'commentList' lagi karena Adapter sudah pegang datanya
+    // private val commentList = mutableListOf<Comment>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +42,7 @@ class ArticleDetailActivity : AppCompatActivity() {
         val replyEditText: EditText = findViewById(R.id.detail_reply_edittext)
         val postButton: Button = findViewById(R.id.detail_post_button)
 
-        // Ambil data yang dikirim
+        // Ambil data yang dikirim dari Intent
         val articleId = intent.getStringExtra("ARTICLE_ID")
         val title = intent.getStringExtra("ARTICLE_TITLE")
         val contentHtml = intent.getStringExtra("ARTICLE_CONTENT")
@@ -72,18 +73,20 @@ class ArticleDetailActivity : AppCompatActivity() {
             .placeholder(R.drawable.news_placeholder_1)
             .into(imageView)
 
-        // Setup RecyclerView untuk komentar
+        // --- SETUP RECYCLER VIEW ---
         commentsRecyclerView.layoutManager = LinearLayoutManager(this)
-        commentAdapter = CommentAdapter(commentList, articleId ?: "")
+
+        // [PERBAIKAN UTAMA] Tambahkan 'this' sebagai parameter ke-3 (Context)
+        commentAdapter = CommentAdapter(mutableListOf(), articleId ?: "", this)
         commentsRecyclerView.adapter = commentAdapter
 
-        if (articleId != null) {
+        if (!articleId.isNullOrEmpty()) {
+            // Hanya fetch jika ID valid
             fetchComments(articleId)
 
             likeButton.setOnClickListener {
                 val docRef = db.collection("articles").document(articleId)
                 docRef.update("likeCount", FieldValue.increment(1))
-                    .addOnSuccessListener { Log.d("Like", "Like count updated!") }
             }
 
             postButton.setOnClickListener {
@@ -92,6 +95,18 @@ class ArticleDetailActivity : AppCompatActivity() {
                     postNewComment(articleId, commentText, replyEditText)
                 }
             }
+        } else {
+            // Jika ID kosong, beritahu user dan tutup halaman biar gak crash
+            Toast.makeText(this, "Error: Data Artikel Tidak Ditemukan", Toast.LENGTH_SHORT).show()
+            finish()
+        }
+    }
+
+    // [PENTING] Matikan ML saat Activity ditutup agar tidak bikin HP panas
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::commentAdapter.isInitialized) {
+            commentAdapter.releaseResources()
         }
     }
 
@@ -106,17 +121,30 @@ class ArticleDetailActivity : AppCompatActivity() {
                 }
 
                 if (snapshots != null) {
-                    val fetchedComments = snapshots.toObjects(Comment::class.java)
-                    commentList.clear()
-                    commentList.addAll(fetchedComments)
-                    commentAdapter.notifyDataSetChanged()
+                    // Ambil data langsung jadi objek Comment
+                    val fetchedComments = mutableListOf<Comment>()
+                    for (doc in snapshots.documents) {
+                        val c = doc.toObject(Comment::class.java)
+                        if (c != null) {
+                            c.id = doc.id
+                            fetchedComments.add(c)
+                        }
+                    }
+
+                    // Gunakan setData agar Adapter yang mengurus update UI
+                    commentAdapter.setData(fetchedComments)
                 }
             }
     }
 
     private fun postNewComment(articleId: String, commentText: String, replyEditText: EditText) {
         val articleDocRef = db.collection("articles").document(articleId)
-        val newComment = Comment(authorName = "You", commentText = commentText)
+
+        // Buat objek comment (pastikan Model Comment kamu punya field ini)
+        val newComment = Comment(
+            authorName = "You", // Nanti ganti dengan current user name
+            commentText = commentText
+        )
 
         db.runBatch { batch ->
             val newCommentRef = articleDocRef.collection("comments").document()

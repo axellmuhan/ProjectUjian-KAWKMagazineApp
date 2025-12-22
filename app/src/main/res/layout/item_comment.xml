@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -31,6 +32,24 @@
                 android:text="Karrell Wilson"
                 android:textColor="@color/dark_text_primary"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_sentiment_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textSize="10sp"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:background="@drawable/bg_rounded_sentiment"
+                android:visibility="gone"
+                tools:text="Positif"
+                tools:backgroundTint="#2E7D32"
+                tools:visibility="visible"/>
 
             <TextView
                 android:id="@+id/comment_timestamp"

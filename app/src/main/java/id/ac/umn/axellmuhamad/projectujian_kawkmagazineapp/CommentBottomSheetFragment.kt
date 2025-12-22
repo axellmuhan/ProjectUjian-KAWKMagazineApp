@@ -1,4 +1,4 @@
-package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp // Sesuaikan
+package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp // Sesuaikan package
 
 import android.os.Bundle
 import android.util.Log
@@ -18,7 +18,9 @@ import com.google.firebase.firestore.Query
 class CommentBottomSheetFragment : BottomSheetDialogFragment() {
 
     private lateinit var commentAdapter: CommentAdapter
-    private val commentList = mutableListOf<Comment>()
+    // Kita tidak butuh list lokal 'commentList' lagi di sini karena adapter sudah menanganinya
+    // private val commentList = mutableListOf<Comment>()
+
     private val db = FirebaseFirestore.getInstance()
     private var articleId: String? = null
 
@@ -44,7 +46,10 @@ class CommentBottomSheetFragment : BottomSheetDialogFragment() {
         val replyEditText: EditText = view.findViewById(R.id.reply_edittext)
         val cancelButton: TextView = view.findViewById(R.id.cancel_button)
 
-        commentAdapter = CommentAdapter(commentList, articleId ?: "")
+        // [UBAH 1] Tambahkan requireContext() di parameter ke-3
+        // Parameter: (List Kosong Awal, ID Artikel, Context)
+        commentAdapter = CommentAdapter(mutableListOf(), articleId ?: "", requireContext())
+
         commentsRecyclerView.layoutManager = LinearLayoutManager(context)
         commentsRecyclerView.adapter = commentAdapter
 
@@ -59,6 +64,14 @@ class CommentBottomSheetFragment : BottomSheetDialogFragment() {
             if (commentText.isNotBlank() && articleId != null) {
                 postNewComment(commentText, replyEditText)
             }
+        }
+    }
+
+    // [UBAH 2] Tambahkan ini untuk menutup Model ML saat sheet ditutup
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (::commentAdapter.isInitialized) {
+            commentAdapter.releaseResources()
         }
     }
 
@@ -83,19 +96,22 @@ class CommentBottomSheetFragment : BottomSheetDialogFragment() {
                             fetchedComments.add(comment)
                         }
                     }
-                    commentList.clear()
-                    commentList.addAll(fetchedComments)
-                    commentAdapter.notifyDataSetChanged()
+
+                    // [UBAH 3] Pakai setData() milik adapter biar lebih bersih
+                    commentAdapter.setData(fetchedComments)
                 }
             }
     }
 
     private fun postNewComment(commentText: String, replyEditText: EditText) {
         val articleDocRef = db.collection("articles").document(articleId!!)
+
+        // Sesuaikan dengan Model Comment kamu (tambahkan field createdAt jika perlu di model)
         val newComment = Comment(
-            authorName = "You",
+            authorName = "You", // Nanti bisa diganti nama user asli dari FirebaseAuth
             commentText = commentText
         )
+
         db.runBatch { batch ->
             val newCommentRef = articleDocRef.collection("comments").document()
             batch.set(newCommentRef, newComment)
