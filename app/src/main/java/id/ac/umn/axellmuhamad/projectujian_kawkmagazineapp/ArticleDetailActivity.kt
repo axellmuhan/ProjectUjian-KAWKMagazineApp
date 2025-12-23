@@ -1,9 +1,11 @@
 package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp // Sesuaikan
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.util.Log
+import android.view.View // Import View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth // 1. Import Auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -24,14 +27,16 @@ class ArticleDetailActivity : AppCompatActivity() {
 
     private val db = FirebaseFirestore.getInstance()
     private lateinit var commentAdapter: CommentAdapter
-    // Kita tidak butuh variabel lokal 'commentList' lagi karena Adapter sudah pegang datanya
-    // private val commentList = mutableListOf<Comment>()
+    private lateinit var auth: FirebaseAuth // 2. Variabel Auth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_article_detail)
 
-        // Cari semua komponen view
+        // 3. Inisialisasi Auth
+        auth = FirebaseAuth.getInstance()
+        val currentUser = auth.currentUser
+
         val imageView: ImageView = findViewById(R.id.article_image_detail)
         val titleView: TextView = findViewById(R.id.article_title_detail)
         val timestampView: TextView = findViewById(R.id.article_timestamp_detail)
@@ -42,7 +47,7 @@ class ArticleDetailActivity : AppCompatActivity() {
         val replyEditText: EditText = findViewById(R.id.detail_reply_edittext)
         val postButton: Button = findViewById(R.id.detail_post_button)
 
-        // Ambil data yang dikirim dari Intent
+        // Ambil Data Intent
         val articleId = intent.getStringExtra("ARTICLE_ID")
         val title = intent.getStringExtra("ARTICLE_TITLE")
         val contentHtml = intent.getStringExtra("ARTICLE_CONTENT")
@@ -50,7 +55,6 @@ class ArticleDetailActivity : AppCompatActivity() {
         val timestamp = intent.getParcelableExtra<Timestamp>("ARTICLE_TIMESTAMP")
         val authorName = intent.getStringExtra("ARTICLE_AUTHOR")
 
-        // Tampilkan data artikel
         titleView.text = title
         authorView.text = authorName
 
@@ -73,36 +77,64 @@ class ArticleDetailActivity : AppCompatActivity() {
             .placeholder(R.drawable.news_placeholder_1)
             .into(imageView)
 
-        // --- SETUP RECYCLER VIEW ---
         commentsRecyclerView.layoutManager = LinearLayoutManager(this)
-
-        // [PERBAIKAN UTAMA] Tambahkan 'this' sebagai parameter ke-3 (Context)
         commentAdapter = CommentAdapter(mutableListOf(), articleId ?: "", this)
         commentsRecyclerView.adapter = commentAdapter
 
+        // ===============================================
+        // 🔒 LOGIKA GUEST MODE (PROTEKSI TOTAL) 🔒
+        // ===============================================
+
         if (!articleId.isNullOrEmpty()) {
-            // Hanya fetch jika ID valid
             fetchComments(articleId)
 
+            // --- 1. PROTEKSI LIKE ---
             likeButton.setOnClickListener {
-                val docRef = db.collection("articles").document(articleId)
-                docRef.update("likeCount", FieldValue.increment(1))
-            }
-
-            postButton.setOnClickListener {
-                val commentText = replyEditText.text.toString()
-                if(commentText.isNotBlank()){
-                    postNewComment(articleId, commentText, replyEditText)
+                if (currentUser == null) {
+                    // Jika Tamu -> Tolak
+                    Toast.makeText(this, "Login dulu untuk menyukai artikel!", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Jika User -> Lanjut
+                    val docRef = db.collection("articles").document(articleId)
+                    docRef.update("likeCount", FieldValue.increment(1))
                 }
             }
+
+            // --- 2. PROTEKSI KOMENTAR (UI & KLIK) ---
+            if (currentUser == null) {
+                // JIKA TAMU:
+                // Sembunyikan kotak ketik
+                replyEditText.visibility = View.GONE
+
+                // Ubah tombol Post jadi "LOGIN"
+                postButton.text = "LOGIN UNTUK KOMEN"
+
+                // Arahkan ke Login saat diklik
+                postButton.setOnClickListener {
+                    val intent = Intent(this, MainActivity::class.java) // Kembali ke Main (LoginFragment)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                }
+            } else {
+                // JIKA USER:
+                // Tampilan Normal
+                replyEditText.visibility = View.VISIBLE
+                postButton.text = "POST"
+
+                postButton.setOnClickListener {
+                    val commentText = replyEditText.text.toString()
+                    if (commentText.isNotBlank()) {
+                        postNewComment(articleId, commentText, replyEditText)
+                    }
+                }
+            }
+
         } else {
-            // Jika ID kosong, beritahu user dan tutup halaman biar gak crash
             Toast.makeText(this, "Error: Data Artikel Tidak Ditemukan", Toast.LENGTH_SHORT).show()
             finish()
         }
     }
 
-    // [PENTING] Matikan ML saat Activity ditutup agar tidak bikin HP panas
     override fun onDestroy() {
         super.onDestroy()
         if (::commentAdapter.isInitialized) {
@@ -115,13 +147,8 @@ class ArticleDetailActivity : AppCompatActivity() {
             .collection("comments")
             .orderBy("createdAt", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshots, error ->
-                if (error != null) {
-                    Log.e("DetailComments", "Error fetching comments", error)
-                    return@addSnapshotListener
-                }
-
+                if (error != null) return@addSnapshotListener
                 if (snapshots != null) {
-                    // Ambil data langsung jadi objek Comment
                     val fetchedComments = mutableListOf<Comment>()
                     for (doc in snapshots.documents) {
                         val c = doc.toObject(Comment::class.java)
@@ -130,19 +157,19 @@ class ArticleDetailActivity : AppCompatActivity() {
                             fetchedComments.add(c)
                         }
                     }
-
-                    // Gunakan setData agar Adapter yang mengurus update UI
                     commentAdapter.setData(fetchedComments)
                 }
             }
     }
 
     private fun postNewComment(articleId: String, commentText: String, replyEditText: EditText) {
-        val articleDocRef = db.collection("articles").document(articleId)
+        // [PERBAIKAN] Ambil nama asli user
+        val user = auth.currentUser
+        val realName = user?.displayName ?: user?.email ?: "Anonymous"
 
-        // Buat objek comment (pastikan Model Comment kamu punya field ini)
+        val articleDocRef = db.collection("articles").document(articleId)
         val newComment = Comment(
-            authorName = "You", // Nanti ganti dengan current user name
+            authorName = realName,
             commentText = commentText
         )
 

@@ -16,7 +16,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
-// Hapus parameter ML, biarkan Context karena Bookmark butuh Context buat Toast
 class NewsAdapter(
     private var articleList: List<Article>,
     private val context: Context
@@ -48,12 +47,10 @@ class NewsAdapter(
         holder.likeAction.text = article.likeCount.toString()
         holder.commentAction.text = article.commentCount.toString()
 
-        // --- BAGIAN ML/SENTIMEN SUDAH DIHAPUS DI SINI ---
-
         // Bookmark Icon Default
         holder.saveAction.setImageResource(R.drawable.ic_bookmark_outline)
 
-        // Klik Berita ke Detail
+        // Klik Berita ke Detail (Semua orang boleh klik)
         holder.itemView.setOnClickListener {
             Log.d("NewsAdapter", "Mengirim ID Artikel: ${article.id}")
             val intent = Intent(context, ArticleDetailActivity::class.java).apply {
@@ -67,15 +64,27 @@ class NewsAdapter(
             context.startActivity(intent)
         }
 
-        // Like Logic
+        // ==========================================
+        // 🔒 PROTEKSI TOMBOL LIKE (GUEST MODE)
+        // ==========================================
         holder.likeAction.setOnClickListener {
+            // 1. Cek apakah ini Tamu?
+            if (user == null) {
+                Toast.makeText(context, "Login dulu untuk menyukai artikel!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener // ⛔ STOP, jangan lanjut ke database
+            }
+
+            // 2. Jika User Asli, lanjut update database
             if (article.id.isNotEmpty()) {
                 db.collection("articles").document(article.id)
                     .update("likeCount", FieldValue.increment(1))
             }
         }
 
-        // Comment Logic
+
+        // 💬 TOMBOL KOMEN (Hanya Buka Popup)
+        // Tamu boleh BACA komentar, jadi kita biarkan tombol ini terbuka.
+        // Nanti di dalam CommentBottomSheetFragment kita kunci tombol "Kirim"-nya.
         holder.commentAction.setOnClickListener {
             if (article.id.isNotEmpty()) {
                 val commentSheet = CommentBottomSheetFragment.newInstance(article.id)
@@ -84,25 +93,33 @@ class NewsAdapter(
             }
         }
 
-        // --- BOOKMARK LOGIC (DIJAGA TETAP SAMA SEPERTI TEMANMU) ---
+        // 🔒 PROTEKSI TOMBOL BOOKMARK (GUEST MODE)
         holder.saveAction.setOnClickListener {
-            if (user != null && article.id.isNotEmpty()) {
+            // 1. Cek apakah ini Tamu?
+            if (user == null) {
+                Toast.makeText(context, "Login dulu untuk menyimpan artikel!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener // ⛔ STOP
+            }
+
+            // 2. Jika User Asli, jalankan logika Bookmark
+            if (article.id.isNotEmpty()) {
                 val docRef = db.collection("users").document(user.uid)
                     .collection("saved_articles").document(article.id)
+
                 docRef.get().addOnSuccessListener { doc ->
                     if (doc.exists()) {
                         docRef.delete().addOnSuccessListener {
-                            Toast.makeText(context, "Removed from Bookmarks!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Dihapus dari Bookmark!", Toast.LENGTH_SHORT).show()
+                            holder.saveAction.setImageResource(R.drawable.ic_bookmark_outline)
                         }
                     } else {
                         docRef.set(article).addOnSuccessListener {
-                            Toast.makeText(context, "Added to Bookmarks!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Disimpan ke Bookmark!", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
             }
         }
-        // -----------------------------------------------------------
 
         Glide.with(context)
             .load(article.imageUrl)

@@ -1,5 +1,6 @@
-package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp // Sesuaikan package
+package id.ac.umn.axellmuhamad.projectujian_kawkmagazineapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,6 +12,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -18,10 +20,8 @@ import com.google.firebase.firestore.Query
 class CommentBottomSheetFragment : BottomSheetDialogFragment() {
 
     private lateinit var commentAdapter: CommentAdapter
-    // Kita tidak butuh list lokal 'commentList' lagi di sini karena adapter sudah menanganinya
-    // private val commentList = mutableListOf<Comment>()
-
     private val db = FirebaseFirestore.getInstance()
+    private lateinit var auth: FirebaseAuth // [UBAH 2] Variabel Auth
     private var articleId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,35 +41,70 @@ class CommentBottomSheetFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // [UBAH 3] Inisialisasi Auth
+        auth = FirebaseAuth.getInstance()
+        val currentUser = auth.currentUser
+
         val commentsRecyclerView: RecyclerView = view.findViewById(R.id.comments_recyclerview)
         val postButton: TextView = view.findViewById(R.id.post_button)
         val replyEditText: EditText = view.findViewById(R.id.reply_edittext)
         val cancelButton: TextView = view.findViewById(R.id.cancel_button)
 
-        // [UBAH 1] Tambahkan requireContext() di parameter ke-3
-        // Parameter: (List Kosong Awal, ID Artikel, Context)
+        // Setup Adapter
         commentAdapter = CommentAdapter(mutableListOf(), articleId ?: "", requireContext())
-
         commentsRecyclerView.layoutManager = LinearLayoutManager(context)
         commentsRecyclerView.adapter = commentAdapter
 
+        // Load Komentar (Semua orang boleh baca)
         fetchComments()
 
         cancelButton.setOnClickListener {
             dismiss()
         }
 
-        postButton.setOnClickListener {
-            val commentText = replyEditText.text.toString()
-            if (commentText.isNotBlank() && articleId != null) {
-                postNewComment(commentText, replyEditText)
+        // ===========================================
+        // 🔒 [UBAH 4] LOGIKA GUEST MODE (PENTING!)
+        // ===========================================
+        if (currentUser == null) {
+            // --- JIKA TAMU (GUEST) ---
+
+            // 1. Sembunyikan kolom ketik biar ga bisa ngetik
+            replyEditText.visibility = View.GONE
+
+            // 2. Ubah tombol "POST" jadi tombol "LOGIN"
+            postButton.text = "LOGIN"
+
+            // 3. Arahkan ke halaman Login saat diklik
+            postButton.setOnClickListener {
+                dismiss() // Tutup popup dulu
+
+                // GANTI KE MainActivity
+                val intent = Intent(requireContext(), MainActivity::class.java)
+                // Flag ini untuk menghapus history agar user tidak bisa tekan Back ke halaman sebelumnya
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+            }
+
+        } else {
+            // --- JIKA USER (SUDAH LOGIN) ---
+
+            // Tampilan normal
+            replyEditText.visibility = View.VISIBLE
+            postButton.text = "POST"
+
+            // Logika Posting Normal
+            postButton.setOnClickListener {
+                val commentText = replyEditText.text.toString()
+                if (commentText.isNotBlank() && articleId != null) {
+                    postNewComment(commentText, replyEditText)
+                }
             }
         }
     }
 
-    // [UBAH 2] Tambahkan ini untuk menutup Model ML saat sheet ditutup
     override fun onDestroyView() {
         super.onDestroyView()
+        // Menutup resource ML saat ditutup (Penting agar tidak memory leak)
         if (::commentAdapter.isInitialized) {
             commentAdapter.releaseResources()
         }
@@ -96,8 +131,6 @@ class CommentBottomSheetFragment : BottomSheetDialogFragment() {
                             fetchedComments.add(comment)
                         }
                     }
-
-                    // [UBAH 3] Pakai setData() milik adapter biar lebih bersih
                     commentAdapter.setData(fetchedComments)
                 }
             }
@@ -106,10 +139,14 @@ class CommentBottomSheetFragment : BottomSheetDialogFragment() {
     private fun postNewComment(commentText: String, replyEditText: EditText) {
         val articleDocRef = db.collection("articles").document(articleId!!)
 
-        // Sesuaikan dengan Model Comment kamu (tambahkan field createdAt jika perlu di model)
+        // [UBAH 5] Ambil nama asli user, jangan hardcode "You" lagi
+        val user = auth.currentUser
+        val realName = user?.displayName ?: user?.email ?: "Anonymous"
+
         val newComment = Comment(
-            authorName = "You", // Nanti bisa diganti nama user asli dari FirebaseAuth
+            authorName = realName,
             commentText = commentText
+            // Pastikan field lain seperti timestamp di-handle di Model atau ServerTimestamp
         )
 
         db.runBatch { batch ->
@@ -122,7 +159,7 @@ class CommentBottomSheetFragment : BottomSheetDialogFragment() {
                 replyEditText.text.clear()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(context, "Failed to post comment: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Failed to post: ${e.message}", Toast.LENGTH_SHORT).show()
                 Log.e("CommentSheet", "Error posting comment", e)
             }
     }
